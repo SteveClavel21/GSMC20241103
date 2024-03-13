@@ -120,7 +120,7 @@ namespace GSMC20241103.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Nombre,Marca,Modelo,Precio")] Computadora computadora)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Nombre,Marca,Modelo,Precio,Componente")] Computadora computadora)
         {
             if (id != computadora.Id)
             {
@@ -129,7 +129,48 @@ namespace GSMC20241103.Controllers
 
             try
             {
-                _context.Update(computadora);
+                // Obtener los datos de la base de datos que van a ser modificados
+                var facturaUpdate = await _context.Computadoras
+                        .Include(s => s.Componente)
+                        .FirstAsync(s => s.Id == computadora.Id);
+                facturaUpdate.Nombre = computadora.Nombre;
+                facturaUpdate.Marca = computadora.Marca;
+                facturaUpdate.Modelo = computadora.Modelo;
+                facturaUpdate.Precio = computadora.Precio;
+                //facturaUpdate.Estado = proyecto.Estado;
+                // Obtener todos los detalles que seran nuevos y agregarlos a la base de datos
+                var detNew = computadora.Componente.Where(s => s.Id == 0);
+                foreach (var d in detNew)
+                {
+                    facturaUpdate.Componente.Add(d);
+                }
+                // Obtener todos los detalles que seran modificados y actualizar a la base de datos
+                var detUpdate = computadora.Componente.Where(s => s.Id > 0);
+                foreach (var d in detUpdate)
+                {
+                    var det = facturaUpdate.Componente.FirstOrDefault(s => s.Id == d.Id);
+                    det.Nombre = d.Nombre;
+                    det.Tipo = d.Tipo;
+                    det.Marca = d.Marca;
+                    det.Precio = d.Precio;
+
+                }
+                // Obtener todos los detalles que seran eliminados y actualizar a la base de datos
+                var delDet = computadora.Componente.Where(s => s.Id < 0).ToList();
+                if (delDet != null && delDet.Count > 0)
+                {
+                    foreach (var d in delDet)
+                    {
+                        d.Id = d.Id * -1;
+                        var det = facturaUpdate.Componente.FirstOrDefault(s => s.Id == d.Id);
+                        _context.Remove(det);
+                        // facturaUpdate.DetFacturaVenta.Remove(det);
+                    }
+                }
+                // Aplicar esos cambios a la base de datos
+
+
+                _context.Update(facturaUpdate);
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
