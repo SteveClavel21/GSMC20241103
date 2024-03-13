@@ -35,19 +35,28 @@ namespace GSMC20241103.Controllers
             }
 
             var computadora = await _context.Computadoras
+                 .Include(s => s.Componente)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (computadora == null)
             {
                 return NotFound();
             }
-
+            ViewBag.Accion = "Details";
             return View(computadora);
         }
 
         // GET: Computadoras/Create
         public IActionResult Create()
         {
-            return View();
+            var computadora = new Computadora();
+
+            computadora.Componente = new List<Componente>();
+            computadora.Precio = 0;
+            computadora.Componente.Add(new Componente
+            {
+            });
+            ViewBag.Accion = "Create";
+            return View(computadora);
         }
 
         // POST: Computadoras/Create
@@ -55,17 +64,38 @@ namespace GSMC20241103.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Nombre,Marca,Modelo,Precio")] Computadora computadora)
+        public async Task<IActionResult> Create([Bind("Id,Nombre,Marca,Modelo,Precio,Componente")] Computadora computadora)
         {
-            if (ModelState.IsValid)
-            {
+           
                 _context.Add(computadora);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
-            }
-            return View(computadora);
+            
+          //  return View(computadora);
+        }
+        [HttpPost]
+        public ActionResult AgregarDetalles([Bind("Id,Nombre,Marca,Modelo,Precio,Componente")] Computadora computadora, string accion)
+        {
+            computadora.Componente.Add(new Componente { });
+            ViewBag.Accion = accion;
+            return View(accion, computadora);
         }
 
+        public ActionResult EliminarDetalles([Bind("Id,Nombre,Marca,Modelo,Precio,Componente")] Computadora computadora, int index, string accion)
+        {
+            var det = computadora.Componente[index];
+            if (accion == "Edit" && det.Id > 0)
+            {
+                det.Id = det.Id * -1;
+            }
+            else
+            {
+                computadora.Componente.RemoveAt(index);
+            }
+
+            ViewBag.Accion = accion;
+            return View(accion, computadora);
+        }
         // GET: Computadoras/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
@@ -74,11 +104,14 @@ namespace GSMC20241103.Controllers
                 return NotFound();
             }
 
-            var computadora = await _context.Computadoras.FindAsync(id);
+            var computadora = await _context.Computadoras
+                 .Include(s => s.Componente)
+                 .FirstAsync(s => s.Id == id);
             if (computadora == null)
             {
                 return NotFound();
             }
+            ViewBag.Accion = "Edit";
             return View(computadora);
         }
 
@@ -94,27 +127,23 @@ namespace GSMC20241103.Controllers
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            try
             {
-                try
-                {
-                    _context.Update(computadora);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ComputadoraExists(computadora.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                _context.Update(computadora);
+                await _context.SaveChangesAsync();
             }
-            return View(computadora);
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!ComputadoraExists(computadora.Id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Computadoras/Delete/5
@@ -126,12 +155,13 @@ namespace GSMC20241103.Controllers
             }
 
             var computadora = await _context.Computadoras
+                 .Include(s => s.Componente)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (computadora == null)
             {
                 return NotFound();
             }
-
+            ViewBag.Accion = "Delete";
             return View(computadora);
         }
 

@@ -7,7 +7,7 @@ namespace GSMC20241103.Models
     {
         public Computadora()
         {
-            Componentes = new List<Componente>();
+            Componente = new List<Componente>();
         }
 
         public int Id { get; set; }
@@ -16,6 +16,6 @@ namespace GSMC20241103.Models
         public string? Modelo { get; set; }
         public decimal? Precio { get; set; }
 
-        public virtual IList<Componente> Componentes { get; set; }
+        public virtual IList<Componente> Componente { get; set; }
     }
 }
