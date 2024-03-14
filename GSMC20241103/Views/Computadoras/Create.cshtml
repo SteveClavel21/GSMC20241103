@@ -4,7 +4,7 @@
     ViewData["Title"] = "Create";
 }
 
-<h1>Create</h1>
+<h1>Crear Registro de Computadora</h1>
 
 <h4>Computadora</h4>
 <hr />
@@ -30,18 +30,17 @@
         <input asp-for="Precio" class="form-control" />
         <span asp-validation-for="Precio" class="text-danger"></span>
     </div>
-    <div>
+    <div class="row row-cols-md-12">
         @await Html.PartialAsync("_Componente", Model.Componente)
     </div>
     <div class="form-group">
-        <input type="submit" value="Create" class="btn btn-primary" />
+        <input type="submit" value="Crear" class="btn btn-primary" />
+        <a asp-action="Index" class="btn btn-primary">Regresar a Inicio</a>
     </div>
 
 </form>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
+
 
 @section Scripts {
     @{
