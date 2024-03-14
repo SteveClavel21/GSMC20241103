@@ -167,7 +167,7 @@ namespace GSMC20241103.Controllers
                         // facturaUpdate.DetFacturaVenta.Remove(det);
                     }
                 }
-                // Aplicar esos cambios a la base de datos
+                // Aplicar esos cambios a la base de datoss
 
 
                 _context.Update(facturaUpdate);
